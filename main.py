@@ -46,42 +46,46 @@ def selecionar_arquivo():
 
 
 def atualizar_cotacoes():
-    # ler o dataframe de moedas (tabela excel) (PARA ISSO PRECISA IMPORTAR "PANDAS")
-    # Atenção a variável "df" significa dataframe
-    df = pd.read_excel(var_caminhoarquivo.get())
-    # pegar a data de início e a data do fim das cotações
-    # moedas = df.iloc[linha, coluna]   assim não vai pegar o arquivo inteiro,
-    # aqui é selecionada a LINHA e a COLUNA sendo " : " (Todas as Linhas)  e  " 0 " (Primeira coluna)
-    moedas = df.iloc[:, 0]
-    data_inicial = calendario_datainicial.get()
-    data_final = calendario_datafinal.get()
-    ano_inicial = data_inicial[-4:] # [-4:] = EDIÇÃO DE "STRING"
-    mes_inicial = data_inicial[3:5] # [3:5] = EDIÇÃO DE "STRING"
-    dia_inicial = data_inicial[:2]  # [:2] = EDIÇÃO DE "STRING"
+    try:
+        # ler o dataframe de moedas (tabela excel) (PARA ISSO PRECISA IMPORTAR "PANDAS")
+        # Atenção a variável "df" significa dataframe
+        df = pd.read_excel(var_caminhoarquivo.get())
+        # pegar a data de início e a data do fim das cotações
+        # moedas = df.iloc[linha, coluna]   assim não vai pegar o arquivo inteiro,
+        # aqui é selecionada a LINHA e a COLUNA sendo " : " (Todas as Linhas)  e  " 0 " (Primeira coluna)
+        moedas = df.iloc[:, 0]
+        data_inicial = calendario_datainicial.get()
+        data_final = calendario_datafinal.get()
+        ano_inicial = data_inicial[-4:] # [-4:] = EDIÇÃO DE "STRING"
+        mes_inicial = data_inicial[3:5] # [3:5] = EDIÇÃO DE "STRING"
+        dia_inicial = data_inicial[:2]  # [:2] = EDIÇÃO DE "STRING"
 
-    ano_final = data_final[-4:]   # [-4:] = EDIÇÃO DE STRING
-    mes_final = data_final[3:5]  # [3:5] = EDIÇÃO DE "STRING"
-    dia_final = data_final[:2]  # [:2] = EDIÇÃO DE "STRING"
-    # função "for"
-    # para cada moeda ( aqui começa a função "for"
-    for moeda in moedas:
-        link = (f"https://economia.awesomeapi.com.br/json/daily/{moeda}-BRL/?" 
-                f"start_date={ano_inicial}{mes_inicial}{dia_inicial}" 
-                f"&end_date={ano_final}{mes_final}{dia_final}")
-        requisisao_moeda = requests.get(link)
-        cotacoes = requisisao_moeda.json()
-        for cotacao in cotacoes:
-            timestamp = int(cotacao['timestamp'])
-            bid = float(cotacao['bid'])
-            data_obj = datetime.fromtimestamp(timestamp)
-            data = data_obj.strftime('%d/%m/%Y')  # para tratar a data no Formato Brasileiro dia/mês/ano.
-            if data not in df:
-                df[data] = np.nan
-                # df.loc[linha,coluna]   para localizar (loc) uma Linha e uma Coluna
-            df.loc[df.iloc[:, 0] == moeda, data] = bid      #  [df.iloc[:, 0]  SIGNIFICA ( " : "    Todas as linhas)
-                               # na [df.iloc[:, 0]    ( " 0 "  Primeira Coluna )
-    df.to_excel("Teste.xlsx")
-    label_atualizarcotacoes['text'] = "Arquivo Atualizado com Sucesso"
+        ano_final = data_final[-4:]   # [-4:] = EDIÇÃO DE STRING
+        mes_final = data_final[3:5]  # [3:5] = EDIÇÃO DE "STRING"
+        dia_final = data_final[:2]  # [:2] = EDIÇÃO DE "STRING"
+        # função "for"
+        # para cada moeda ( aqui começa a função "for"
+        for moeda in moedas:
+            link = (f"https://economia.awesomeapi.com.br/json/daily/{moeda}-BRL/?" 
+                    f"start_date={ano_inicial}{mes_inicial}{dia_inicial}" 
+                    f"&end_date={ano_final}{mes_final}{dia_final}")
+            requisisao_moeda = requests.get(link)
+            cotacoes = requisisao_moeda.json()
+            for cotacao in cotacoes:
+                timestamp = int(cotacao['timestamp'])
+                bid = float(cotacao['bid'])
+                data_obj = datetime.fromtimestamp(timestamp)
+                data = data_obj.strftime('%d/%m/%Y')  # para tratar a data no Formato Brasileiro dia/mês/ano.
+                if data not in df:
+                    df[data] = np.nan
+                    # df.loc[linha,coluna]   para localizar (loc) uma Linha e uma Coluna
+                df.loc[df.iloc[:, 0] == moeda, data] = bid      #  [df.iloc[:, 0]  SIGNIFICA ( " : "    Todas as linhas)
+                                   # na [df.iloc[:, 0]    ( " 0 "  Primeira Coluna )
+        df.to_excel("Teste.xlsx")
+        label_atualizarcotacoes['text'] = "Arquivo Atualizado com Sucesso"
+
+    except:
+        label_atualizarcotacoes['text'] = "Selecione um arquivo Excel no Formato Correto"
 
 
 
